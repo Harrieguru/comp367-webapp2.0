@@ -27,7 +27,7 @@ pipeline {
         stage('Docker Login') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dckr_pat_F-5HKHwx4_bjRIV3zpO9LAN3WPY') {
+                    docker.withRegistry('https://index.docker.io/v1/', credentialsId: 'dockerCredentials') {
                         // Login to Docker Hub
                     }
                 }
@@ -36,7 +36,7 @@ pipeline {
         stage('Docker Push') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dckr_pat_F-5HKHwx4_bjRIV3zpO9LAN3WPY') {
+                    docker.withRegistry('https://index.docker.io/v1/', credentialsId: 'dockerCredentials') {
                         docker.image("comp367-webapp").push("latest")
                     }
                 }
