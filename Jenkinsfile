@@ -1,11 +1,6 @@
 pipeline {
     agent any
     
-    environment {
-        MAVEN_HOME = tool 'MAVEN3'
-        NOHUP_PATH = '' // Disable execution of nohup
-    }
-    
     stages {
         stage('Checkout') {
             steps {
@@ -15,7 +10,6 @@ pipeline {
         
         stage('Build Maven Project') {
             steps {
-                // Use the configured Maven installation and JDK
                 withMaven(maven: 'MAVEN3', jdk: 'JDK') {
                     sh 'mvn clean package jacoco:report'
                 }
@@ -24,8 +18,11 @@ pipeline {
         
         stage('Code Coverage') {
             steps {
-                // Capture and archive the Jacoco coverage reports
-                jacoco(classPattern: 'com.example.*', execPattern: '**/target/jacoco.exec')
+                jacoco(
+                    classPattern: '**/target/classes',
+                    execPattern: '**/target/jacoco/*.exec',
+                    sourcePattern: '**/src/main/java'
+                )
                 archiveArtifacts artifacts: 'target/site/jacoco/*'
             }
         }
@@ -56,6 +53,16 @@ pipeline {
                     }
                 }
             }
+        }
+    }
+    
+    post {
+        success {
+            jacoco(
+                classPattern: '**/target/classes',
+                execPattern: '**/target/jacoco/*.exec',
+                sourcePattern: '**/src/main/java'
+            )
         }
     }
 }
