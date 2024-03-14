@@ -3,6 +3,7 @@ pipeline {
     
     environment {
         MAVEN_HOME = tool 'MAVEN3'
+        NOHUP_PATH = '' // Disable execution of nohup
     }
     
     stages {
