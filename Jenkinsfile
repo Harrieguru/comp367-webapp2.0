@@ -10,9 +10,7 @@ pipeline {
         
         stage('Build Maven Project') {
             steps {
-                withMaven(maven: 'MAVEN3', jdk: 'JDK') {
-                    sh 'mvn clean package jacoco:report'
-                }
+                bat 'mvn clean package jacoco:report'
             }
         }
         
@@ -30,7 +28,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 script {
-                    docker.build('comp367-webapp')
+                    bat 'docker build -t comp367-webapp .'
                 }
             }
         }
@@ -38,8 +36,8 @@ pipeline {
         stage('Docker Login') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerCredentials') {
-                        // Docker login is handled automatically using the provided credentials
+                    withCredentials([usernamePassword(credentialsId: 'dockerCredentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        bat 'docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%'
                     }
                 }
             }
@@ -48,21 +46,9 @@ pipeline {
         stage('Docker Push') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerCredentials') {
-                        docker.image('comp367-webapp').push('latest')
-                    }
+                    bat 'docker push comp367-webapp:latest'
                 }
             }
-        }
-    }
-    
-    post {
-        success {
-            jacoco(
-                classPattern: '**/target/classes',
-                execPattern: '**/target/jacoco/*.exec',
-                sourcePattern: '**/src/main/java'
-            )
         }
     }
 }
