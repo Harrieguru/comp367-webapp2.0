@@ -9,7 +9,10 @@ pipeline {
         }
         stage('Build Maven Project') {
             steps {
-                sh 'mvn clean package jacoco:report'
+                // Use the configured Maven installation
+                withMaven(maven: 'MAVEN3') {
+                    sh 'mvn clean package jacoco:report'
+                }
             }
         }
         stage('Code Coverage') {
@@ -27,7 +30,7 @@ pipeline {
         stage('Docker Login') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', credentialsId: 'dockerCredentials') {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dckr_pat_F-5HKHwx4_bjRIV3zpO9LAN3WPY') {
                         // Login to Docker Hub
                     }
                 }
@@ -36,7 +39,7 @@ pipeline {
         stage('Docker Push') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', credentialsId: 'dockerCredentials') {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dckr_pat_F-5HKHwx4_bjRIV3zpO9LAN3WPY') {
                         docker.image("comp367-webapp").push("latest")
                     }
                 }
